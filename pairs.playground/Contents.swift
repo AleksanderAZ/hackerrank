@@ -4,45 +4,45 @@ import Foundation
 // Complete the pairs function below.
 func pairs(k: Int, arr: [Int]) -> Int {
     
-    let sizeArr = arr.count
-    guard sizeArr > 1 else { return 0 }
-    let lastIndex: Int = sizeArr - 1
     var countPairs: Int = 0
+    let lastIndex = arr.count
+    let penultIndex = lastIndex - 1
+    var j = 0
+    var  itemPlas = 0
+    var  itemMin = 0
+    var i = 0
+    var itemI = 0
+    var itemJ = 0
+    var count = 0
     
-    var newArr = arr.sorted()
     
-    var subtr = 0
-    var i = lastIndex
-    while i > 0 {
-        var j = i - 1
-            subtr = newArr[i] - newArr[0]
-            if(subtr < k) {
+    while ( i < penultIndex) {
+        itemI = arr[i]
+        itemPlas = itemI + k
+        itemMin = itemI - k
+        count = 0
+        j = i + 1
+        while ( j < lastIndex) {
+            itemJ = arr[j]
+            if (itemJ == itemPlas ) {
+                count += 1
+                if (itemMin < 1) { j = lastIndex }
             }
-            else {
-                if(subtr == k) {
-                    countPairs += 1
-                }
-                while j > 0 {
-                    subtr = newArr[i] - newArr[j]
-                    if(subtr > k) {
-                        j = -1
-                    }
-                    else {
-                        if(subtr == k) {
-                            countPairs += 1
-                        }
-                        j -= 1
-                    }
-                }
+            else if (itemJ == itemMin) {
+                count += 1
             }
-        i -= 1
+            if (count > 1) { j = lastIndex }
+            j += 1
+        }
+        countPairs += count
+        i += 1
     }
-    
     return countPairs
 }
 
 let k = 2
 let arr = [1, 5, 3, 4, 2]
 
-let result = pairs(k: k, arr: arr)
+var result = pairs(k: k, arr: arr)
 print(result)
+print("-------")

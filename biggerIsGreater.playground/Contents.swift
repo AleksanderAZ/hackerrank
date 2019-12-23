@@ -1,8 +1,48 @@
 import UIKit
-
 import Foundation
 
 func biggerIsGreater(w: String) -> String {
+    let size = w.count
+    guard size > 1 else { return "no answer" }
+    
+    var i = 1
+    var pref = w.prefix(size - 1)
+    var suff = w.suffix(1)
+    var suffPref = pref.suffix(1)
+    var prefSuff = suff.prefix(1)
+    if(suffPref >= prefSuff) {
+        i += 1
+        while (i<=size) {
+            pref = w.prefix(size - i)  // head
+            suff = w.suffix(i)         // xbost
+            suffPref = pref.suffix(1)  // key
+            prefSuff = suff.prefix(1)
+            if(suffPref < prefSuff) {
+                break
+            }
+            i += 1
+        }
+    }
+    if i >= size { return "no answer" }
+    
+   
+    
+    let key = suffPref.first ?? " "
+    let changIndex = suff.lastIndex() {(c) in c < key }  ?? suff.startIndex
+    // print("-------",i,size,"   ", " ;  ", pref,";",suffPref,";",suff, " = ", prefSuff,";")
+    let s = suff[...changIndex]
+    let p = suff.suffix(from: changIndex)
+    
+    let xv = (s.count > 0 ? s.prefix(s.count-1) : "") + suffPref + (p.count > 0 ? p.suffix(p.count-1) : "")
+    
+    let result = String(pref.count > 1 ? pref.prefix(pref.count-1) : "") + String(suff[changIndex]) + String(xv.reversed())
+ print(key," ;  ", s," ;  ", p, "-------",i,size,"  || ",suff[changIndex], " ;-  ", pref,";",suffPref,";",suff, " = ", prefSuff,";", xv)
+    return result
+}
+
+//------------------------------------------------------
+
+func biggerIsGreater2(w: String) -> String {
     let size = w.count
     guard size > 1 else { return "no answer" }
     let lastIndex = size - 1
@@ -80,10 +120,12 @@ func biggerIsGreater1(w: String) -> String {
     return result
 }
 
-var x = "abc"
+var x = "cdhk"
 for _ in 0...100 {
-    print(x, biggerIsGreater(w: x))
-    x = biggerIsGreater1(w: x)
+    let q = biggerIsGreater(w: x)
+    let w = biggerIsGreater1(w: x)
+    print(x, q, w, q == w)
+    x = w
     if (x == "no answre") { break }
 }
 

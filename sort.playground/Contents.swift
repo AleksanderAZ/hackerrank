@@ -84,10 +84,10 @@ func creatArray(count: Int)-> [Int] {
     return array
 }
 // init data
-let test = creatArray(count: 500)
-let max = 32
+let test = creatArray(count: 500000)
+let max = 4
 //
-for i in 0...max {
+for i in 3...max {
     print("-------\(i)------")
     let queueNew = OperationQueue()
     queueNew.name = "com"

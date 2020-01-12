@@ -163,3 +163,49 @@ func sort(list: Array<Int>, in cores: Int)->Array<Int> {
     
     return sort.getSort()
 }
+
+// ----TEST -------
+// generate Array
+func creatArray(count: Int)-> [Int] {
+    let third = count // count / 2
+    var array = [Int]()
+    for i in 0..<third {
+        array.append(i)
+    }
+    array = array.reversed()
+    //for i in third..<count {
+    //   array.append(i)
+    //}
+    return array
+}
+
+func creatRendomArray(count: Int)-> [Int] {
+    var array = [Int]()
+    for _ in 0..<count {
+        array.append(Int.random(in: 1..<count))
+    }
+    return array
+}
+
+func test() {
+    // cores
+    let minCores = 1
+    let maxCores = 4
+    // count array
+    let countArray = 7777
+    let test = creatRendomArray(count: countArray)
+    for cores in minCores...maxCores {
+        for _ in 1...2 {
+            let tStart = Date()
+            let result1 = sort(list: test, in: cores)
+            let tEnd = Date().timeIntervalSince(tStart)
+            let testResult = test.sorted()
+            let flag = (testResult == result1)
+            print("core=", cores, "countArray=", countArray, flag, "time=", tEnd)
+        }
+    }
+}
+
+test()
+
+

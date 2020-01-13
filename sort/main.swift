@@ -27,7 +27,11 @@ func sort(list: Array<Int>, in cores: Int)->Array<Int> {
         
         func merge( inList: inout [Int], outList: inout [Int], indexStart: Int, indexEnd: Int) {
             let countIndex = indexEnd - indexStart
-            guard countIndex > 0 else { outList[indexStart] = inList[indexStart];  return}
+            guard countIndex > 0 else { outList[indexStart] = inList[indexStart]
+                //print("\n \(inList) inList\n", "\(outList) outList\n", "indexStart=\(indexStart)", "indexEnd=\(indexEnd) ---" )
+                return
+                
+            }
             var newIndex = indexStart
             var leftIndex = indexStart
             let leftIndexEnd = indexStart + countIndex / 2
@@ -67,6 +71,7 @@ func sort(list: Array<Int>, in cores: Int)->Array<Int> {
                 }
                 newIndex += 1
             }
+           // print("\n \(inList) inList\n", "\(outList) outList\n", "indexStart=\(indexStart)", "indexEnd=\(indexEnd)---" )
         }
         
         class ControlQueueOld {
@@ -77,10 +82,9 @@ func sort(list: Array<Int>, in cores: Int)->Array<Int> {
             }
         }
         
-        
         class ControlQueue {
-            var queue =  DispatchQueue(label: "sort.merger.cores", qos: .userInteractive)
-            var queueControl =  DispatchQueue(label: "sort.merger.control", qos: .userInteractive, attributes: .concurrent)
+            var queue =  DispatchQueue(label: "sort.merger.cores", qos: .userInteractive, attributes: .concurrent)
+            var queueControl =  DispatchQueue(label: "sort.merger.control", qos: .userInteractive)
             var cores: Int
             var items = [DispatchWorkItem?]()
             var _countCores: Int = 0
@@ -97,8 +101,8 @@ func sort(list: Array<Int>, in cores: Int)->Array<Int> {
                 countCores = 0
             }
             
-            func getQueue(item: DispatchWorkItem)->DispatchQueue {
-                queueControl.sync {
+            func getQueueItem(item: DispatchWorkItem)->DispatchQueue {
+             /*   queueControl.sync {
                     if self.items.count < self.cores {
                         self.items.append(item)
                         self.countCores += 1
@@ -108,34 +112,17 @@ func sort(list: Array<Int>, in cores: Int)->Array<Int> {
                         self.items[self.countCores] = item
                         self.countCores += 1
                     }
-                }
+                } */
+                return queue
+            }
+            
+            func getQueue()->DispatchQueue {
                 return queue
             }
         }
         
         func mergeSort(flagRout: Bool, indexStart: Int, indexEnd: Int)->DispatchWorkItem? {
-            
             let lengthIndexArray = indexEnd - indexStart
-            guard lengthIndexArray > 0 else { return nil }
-            let middleIndex = indexStart + lengthIndexArray / 2
-            
-            let item1 = self.mergeSort(flagRout: !flagRout, indexStart: indexStart, indexEnd: middleIndex)
-            let item2 = self.mergeSort(flagRout: !flagRout, indexStart: middleIndex+1, indexEnd: indexEnd)
-            
-            let nameChangeGroup = DispatchGroup()
-            
-            if (item1 != nil) {
-                let queue1 = controlQueue.getQueue(item: item1!)
-                queue1.async(group: nameChangeGroup, execute: item1!)
-            }
-            if (item2 != nil) {
-                let queue2 = controlQueue.getQueue(item: item2!)
-                queue2.async(group: nameChangeGroup, execute: item2!)
-            }
-            
-            if (!(item1 == nil && item2 == nil)) {
-                nameChangeGroup.wait()
-            }
             
             let item = DispatchWorkItem {
                 if flagRout {
@@ -144,16 +131,28 @@ func sort(list: Array<Int>, in cores: Int)->Array<Int> {
                 else {
                     self.merge( inList: &self.listFirst, outList: &self.listSecond, indexStart: indexStart, indexEnd: indexEnd)
                 }
+                //print("\n \(self.listSecond) listSecond\n", "\(self.listFirst) listFirst\n","flagRout=\(flagRout)", "indexStart=\(indexStart)", "indexEnd=\(indexEnd)" )
             }
+            let queue = controlQueue.getQueue()
+            
+            if lengthIndexArray > 0 {
+                let middleIndex = indexStart + lengthIndexArray / 2
+                let item1 = self.mergeSort(flagRout: !flagRout, indexStart: indexStart, indexEnd: middleIndex)
+                let item2 = self.mergeSort(flagRout: !flagRout, indexStart: middleIndex+1, indexEnd: indexEnd)
+            
+                item1?.notify(queue: queue) {
+                    item2?.notify(queue: queue, execute: item)
+                }
+            }
+            else {
+                queue.async(execute: item)
+            }
+            
             return item
         }
         
         func getSort()->[Int] {
             let item = mergeSort(flagRout: true, indexStart: 0, indexEnd: lastIndexList)
-            if (item != nil) {
-                let queue = controlQueue.getQueue(item: item!)
-                queue.async(execute: item!)
-            }
             item?.wait()
             return listFirst
         }
@@ -190,22 +189,21 @@ func creatRendomArray(count: Int)-> [Int] {
 func test() {
     // cores
     let minCores = 1
-    let maxCores = 4
+    let maxCores = 1
     // count array
     let countArray = 7777
     let test = creatRendomArray(count: countArray)
+    //let test = creatArray(count: countArray)
     for cores in minCores...maxCores {
-        for _ in 1...2 {
             let tStart = Date()
-            let result1 = sort(list: test, in: cores)
+            let result = sort(list: test, in: cores)
             let tEnd = Date().timeIntervalSince(tStart)
             let testResult = test.sorted()
-            let flag = (testResult == result1)
-            print("core=", cores, "countArray=", countArray, flag, "time=", tEnd)
-        }
+            let flag = (testResult == result)
+            print("core=", cores, "countArray=", countArray, flag, "time=", tEnd, "sec")
+            //print(testResult)
+            //print(result)
     }
 }
 
 test()
-
-

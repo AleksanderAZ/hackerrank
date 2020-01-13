@@ -191,7 +191,7 @@ func test() {
     let minCores = 1
     let maxCores = 1
     // count array
-    let countArray = 7777
+    let countArray = 1000000
     let test = creatRendomArray(count: countArray)
     //let test = creatArray(count: countArray)
     for cores in minCores...maxCores {
